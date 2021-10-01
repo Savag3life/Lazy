@@ -16,7 +16,7 @@
 
     <build>
         <defaultGoal>clean package install</defaultGoal>
-        <finalName>Cleaner</finalName>
+        <finalName>Lazy</finalName>
         <sourceDirectory>src/main/java</sourceDirectory>
         <resources>
             <resource>
