@@ -1,4 +1,4 @@
-package life.savag3.cleaner;
+package life.savag3.lazy;
 
 import java.io.File;
 import java.util.ArrayList;

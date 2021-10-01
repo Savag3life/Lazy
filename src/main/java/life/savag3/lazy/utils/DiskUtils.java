@@ -1,6 +1,6 @@
-package life.savag3.cleaner.utils;
+package life.savag3.lazy.utils;
 
-import life.savag3.cleaner.Lazy;
+import life.savag3.lazy.Lazy;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

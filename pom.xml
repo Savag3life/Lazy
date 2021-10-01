@@ -39,7 +39,7 @@
                             <archive>
                                 <manifest>
                                     <mainClass>
-                                        life.savag3.cleaner.Bootstrap
+                                        life.savag3.lazy.Bootstrap
                                     </mainClass>
                                 </manifest>
                             </archive>

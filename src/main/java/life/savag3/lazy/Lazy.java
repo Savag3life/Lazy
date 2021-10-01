@@ -1,10 +1,10 @@
-package life.savag3.cleaner;
+package life.savag3.lazy;
 
 import com.google.gson.GsonBuilder;
-import life.savag3.cleaner.asm.ClassExplorer;
-import life.savag3.cleaner.gson.adaptors.PatternAdaptor;
-import life.savag3.cleaner.utils.DiskUtils;
-import life.savag3.cleaner.utils.Persist;
+import life.savag3.lazy.asm.ClassExplorer;
+import life.savag3.lazy.gson.adaptors.PatternAdaptor;
+import life.savag3.lazy.utils.DiskUtils;
+import life.savag3.lazy.utils.Persist;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.objectweb.asm.ClassReader;

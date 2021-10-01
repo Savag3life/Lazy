@@ -1,4 +1,4 @@
-package life.savag3.cleaner.utils;
+package life.savag3.lazy.utils;
 
 
 import com.google.gson.Gson;

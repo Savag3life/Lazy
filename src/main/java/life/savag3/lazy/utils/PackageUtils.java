@@ -1,6 +1,6 @@
-package life.savag3.cleaner.utils;
+package life.savag3.lazy.utils;
 
-import life.savag3.cleaner.Config;
+import life.savag3.lazy.Config;
 
 public class PackageUtils {
     public static boolean isBlacklistedPackage(String package0) {

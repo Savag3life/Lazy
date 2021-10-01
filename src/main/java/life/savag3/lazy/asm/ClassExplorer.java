@@ -1,8 +1,8 @@
-package life.savag3.cleaner.asm;
+package life.savag3.lazy.asm;
 
-import life.savag3.cleaner.Lazy;
-import life.savag3.cleaner.Config;
-import life.savag3.cleaner.utils.PackageUtils;
+import life.savag3.lazy.Lazy;
+import life.savag3.lazy.Config;
+import life.savag3.lazy.utils.PackageUtils;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.objectweb.asm.*;
