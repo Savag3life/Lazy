@@ -98,7 +98,7 @@ public class ClassExplorer extends ClassVisitor {
                 if (Config.INCLUDE_PUB_NON_STATIC_FIELDS) addField(access, name, descriptor, signature, value);
                 break;
 
-            case 16409:
+            case 16409: // ENUM access
                 if (Config.INCLUDE_ENUM_DATA) {
                     if (Config.VERBOSE) System.out.print(" -- Adding ENUM data\n");
                     cw.visitField(access, name, descriptor, signature, value).visitEnd();
