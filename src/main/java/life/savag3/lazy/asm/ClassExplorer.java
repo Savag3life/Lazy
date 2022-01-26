@@ -14,14 +14,14 @@ import static org.objectweb.asm.Opcodes.*;
 
 public class ClassExplorer extends ClassVisitor {
 
-    private ClassWriter cw;
+    private final ClassWriter cw;
     private String name;
     private String pack;
 
     private boolean cancelled;
 
     public ClassExplorer() {
-        super(ASM4);
+        super(ASM7);
         this.cw = new ClassWriter(0);
     }
 
@@ -79,22 +79,30 @@ public class ClassExplorer extends ClassVisitor {
 
         switch (access) {
             case ACC_STATIC + ACC_PUBLIC:
+            case ACC_STATIC + ACC_PUBLIC + ACC_FINAL:
             case ACC_STATIC + ACC_PUBLIC + ACC_TRANSIENT:
+            case ACC_STATIC + ACC_PUBLIC + ACC_TRANSIENT + ACC_FINAL:
                 if (Config.INCLUDE_PUB_STATIC_FIELDS) addField(access, name, descriptor, signature, value);
                 break;
 
             case ACC_STATIC + ACC_PRIVATE:
+            case ACC_STATIC + ACC_PRIVATE + ACC_FINAL:
             case ACC_STATIC + ACC_PRIVATE + ACC_TRANSIENT:
+            case ACC_STATIC + ACC_PRIVATE + ACC_TRANSIENT + ACC_FINAL:
                 if (Config.INCLUDE_PRI_STATIC_FIELDS) addField(access, name, descriptor, signature, value);
                 break;
 
             case ACC_PRIVATE:
+            case ACC_PRIVATE + ACC_FINAL:
             case ACC_PRIVATE + ACC_TRANSIENT:
+            case ACC_PRIVATE + ACC_TRANSIENT + ACC_FINAL:
                 if (Config.INCLUDE_PRI_NON_STATIC_FIELDS) addField(access, name, descriptor, signature, value);
                 break;
 
             case ACC_PUBLIC:
+            case ACC_PUBLIC + ACC_FINAL:
             case ACC_PUBLIC + ACC_TRANSIENT:
+            case ACC_PUBLIC + ACC_TRANSIENT + ACC_FINAL:
                 if (Config.INCLUDE_PUB_NON_STATIC_FIELDS) addField(access, name, descriptor, signature, value);
                 break;
 

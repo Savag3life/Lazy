@@ -23,6 +23,16 @@ public class DiskUtils {
         return output;
     }
 
+    public byte[] getBytes(InputStream in) throws Exception {
+        try (ByteArrayOutputStream os = new ByteArrayOutputStream();) {
+            byte[] buffer = new byte[0xFFFF];
+            for (int len; (len = in.read(buffer)) != -1;)
+                os.write(buffer, 0, len);
+            os.flush();
+            return os.toByteArray();
+        }
+    }
+
     public void writeBytes(File file, byte[] bytes) throws IOException {
         FileOutputStream out = new FileOutputStream(file);
         out.write(bytes);

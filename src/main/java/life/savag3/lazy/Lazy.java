@@ -4,6 +4,7 @@ import com.google.gson.GsonBuilder;
 import life.savag3.lazy.asm.ClassExplorer;
 import life.savag3.lazy.gson.adaptors.PatternAdaptor;
 import life.savag3.lazy.utils.DiskUtils;
+import life.savag3.lazy.utils.PackageUtils;
 import life.savag3.lazy.utils.Persist;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -98,11 +99,21 @@ public class Lazy {
             if (clazz.isDirectory()) continue;
             if (!clazz.getName().endsWith(".class")) continue;
 
-            ClassExplorer navigator = new ClassExplorer();
-
             ClassReader reader = new ClassReader(jar.getInputStream(clazz));
-            reader.accept(navigator, 0);
-            navigator.visitEnd();
+
+            try {
+                if (PackageUtils.isBlacklistedPackage(clazz.getName())) {
+                    add(clazz.getName(), this.disk.getBytes(jar.getInputStream(clazz)));
+                } else {
+                    ClassExplorer explorer = new ClassExplorer();
+                    reader.accept(explorer, 0);
+                    explorer.visitEnd();
+                }
+            } catch (Exception e) {
+                System.out.println("Failed to read class: " + clazz.getName() + " - Class is compiled on a unsupported version of Java");
+                if (Config.VERBOSE) e.printStackTrace();
+                System.out.println("Skipping class...");
+            }
         }
 
         pack();
