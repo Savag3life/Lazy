@@ -76,21 +76,38 @@ public class ClassExplorer extends ClassVisitor {
         FieldVisitor visitor = super.visitField(access, name, descriptor, signature, value);
         if (cancelled) return visitor;
         if (Config.VERBOSE) System.out.print(" --F-- access=" + access + ",name=" + name + ",extends=" + descriptor + ",super=" + signature + ",value=" + (value == null ? "" : value.toString()) + ";");
-        if (access == ACC_STATIC + ACC_PUBLIC || access == ACC_STATIC + ACC_PUBLIC + ACC_TRANSIENT) {
-            if (Config.INCLUDE_PUB_STATIC_FIELDS) addField(access, name, descriptor, signature, value);
-        } else if (access == ACC_STATIC + ACC_PRIVATE || access == ACC_STATIC + ACC_PRIVATE + ACC_TRANSIENT) {
-            if (Config.INCLUDE_PRI_STATIC_FIELDS) addField(access, name, descriptor, signature, value);
-        } else if (access == ACC_PRIVATE || access == ACC_PRIVATE + ACC_TRANSIENT) {
-            if (Config.INCLUDE_PRI_NON_STATIC_FIELDS) addField(access, name, descriptor, signature, value);
-        } else if (access == ACC_PUBLIC || access == ACC_PUBLIC + ACC_TRANSIENT) {
-            if (Config.INCLUDE_PUB_NON_STATIC_FIELDS) addField(access, name, descriptor, signature, value);
-        } else if (access == 16409) { // ENUM fields
-            if (Config.INCLUDE_ENUM_DATA) {
-                if (Config.VERBOSE) System.out.print(" -- Adding ENUM data\n");
-                cw.visitField(access, name, descriptor, signature, value).visitEnd();
-                Lazy.instance.getFieldCount().incrementAndGet();
-            }
-        } else if (Config.VERBOSE) System.out.print("\n");
+
+        switch (access) {
+            case ACC_STATIC + ACC_PUBLIC:
+            case ACC_STATIC + ACC_PUBLIC + ACC_TRANSIENT:
+                if (Config.INCLUDE_PUB_STATIC_FIELDS) addField(access, name, descriptor, signature, value);
+                break;
+
+            case ACC_STATIC + ACC_PRIVATE:
+            case ACC_STATIC + ACC_PRIVATE + ACC_TRANSIENT:
+                if (Config.INCLUDE_PRI_STATIC_FIELDS) addField(access, name, descriptor, signature, value);
+                break;
+
+            case ACC_PRIVATE:
+            case ACC_PRIVATE + ACC_TRANSIENT:
+                if (Config.INCLUDE_PRI_NON_STATIC_FIELDS) addField(access, name, descriptor, signature, value);
+                break;
+
+            case ACC_PUBLIC:
+            case ACC_PUBLIC + ACC_TRANSIENT:
+                if (Config.INCLUDE_PUB_NON_STATIC_FIELDS) addField(access, name, descriptor, signature, value);
+                break;
+
+            case 16409:
+                if (Config.INCLUDE_ENUM_DATA) {
+                    if (Config.VERBOSE) System.out.print(" -- Adding ENUM data\n");
+                    cw.visitField(access, name, descriptor, signature, value).visitEnd();
+                    Lazy.instance.getFieldCount().incrementAndGet();
+                }
+                break;
+            default:
+                if (Config.VERBOSE) System.out.print("\n");
+        }
         return visitor;
     }
 
