@@ -64,7 +64,7 @@ public class Lazy {
 
         if (args.length < 2) {
             System.out.println("Invalid argument counts. Found " + args.length + ", Required 2");
-            System.out.println("Usage: java -jar <Path/To/Jar.jar> [Path/To/Config.txt] ");
+            System.out.println("Usage: java -jar <Path/To/Input.jar> <Path/To/Output.jar> [Path/To/Config.txt] ");
             System.out.println("Map: `<>` fields are required, `[]` fields are optional");
             System.exit(1);
         }

@@ -36,7 +36,7 @@ public class Config {
     }
 
     public static void load(String path) {
-        Lazy.instance.getPersist().loadOrSaveDefault(instance, Config.class, new File(path,  "config.json"));
+        Lazy.instance.getPersist().loadOrSaveDefault(instance, Config.class, new File(path));
     }
 
     public static void load() {
