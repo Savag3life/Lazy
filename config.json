@@ -1,21 +1,12 @@
 {
-  "BLACKLISTED_PACKAGES": [
-    "your/example/package/*",
-    "com/google/*",
-    "org/*",
-    "javax/*"
-  ],
+  "BLACKLISTED_PACKAGES": [],
   "INCLUDE_PUB_STATIC_FIELDS": true,
   "INCLUDE_PRI_STATIC_FIELDS": true,
   "INCLUDE_PUB_NON_STATIC_FIELDS": true,
   "INCLUDE_PRI_NON_STATIC_FIELDS": true,
-  "INCLUDE_PRIVATE_METHODS": false,
-  "INCLUDE_ABSTRACT_CLASSES": false,
+  "INCLUDE_PRIVATE_METHODS": true,
+  "INCLUDE_ABSTRACT_CLASSES": true,
   "INCLUDE_ENUM_DATA": true,
-  "EXEMPT_STRING_PATTERNS": [
-    {
-      "pattern": "%%__.*([A-Za-z1-9])__%%"
-    }
-  ],
+  "EXEMPT_STRING_PATTERNS": [],
   "VERBOSE": true
 }

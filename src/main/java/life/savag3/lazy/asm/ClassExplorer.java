@@ -21,7 +21,7 @@ public class ClassExplorer extends ClassVisitor {
     private boolean cancelled;
 
     public ClassExplorer() {
-        super(ASM7);
+        super(ASM8);
         this.cw = new ClassWriter(0);
     }
 
