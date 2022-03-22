@@ -9,18 +9,25 @@ public class Config {
 
     public static transient Config instance = new Config();
 
+    // Packages exempt from being stripped by Lazy
     public static List<String> BLACKLISTED_PACKAGES = new ArrayList<>();
 
+    // Include Public Static Fields in the output
     public static boolean INCLUDE_PUB_STATIC_FIELDS = true;
+    // Include Private Static Fields in the output
     public static boolean INCLUDE_PRI_STATIC_FIELDS = true;
+    // Include Public Fields in the output
     public static boolean INCLUDE_PUB_NON_STATIC_FIELDS = true;
+    // Include Private Fields in the output
     public static boolean INCLUDE_PRI_NON_STATIC_FIELDS = true;
+    // Include Public Methods in the output
     public static boolean INCLUDE_PRIVATE_METHODS = false;
+    // Include abstract classes in the output
     public static boolean INCLUDE_ABSTRACT_CLASSES = false;
+    // Include enum data in the output
     public static boolean INCLUDE_ENUM_DATA = true;
 
-    public static List<Pattern> EXEMPT_STRING_PATTERNS = new ArrayList<>();
-
+    // Do logging
     public static boolean VERBOSE = true;
 
     static {
@@ -30,9 +37,6 @@ public class Config {
         BLACKLISTED_PACKAGES.add("com/google/*");
         BLACKLISTED_PACKAGES.add("org/*");
         BLACKLISTED_PACKAGES.add("javax/*");
-
-        // ASM is fat & can't retain values at load time so its `null` or `` always.
-        EXEMPT_STRING_PATTERNS.add(Pattern.compile("%%__.*([A-Za-z1-9])__%%"));
     }
 
     public static void load(String path) {

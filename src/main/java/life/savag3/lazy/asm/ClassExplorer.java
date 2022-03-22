@@ -65,7 +65,6 @@ public class ClassExplorer extends ClassVisitor {
             }
             MethodVisitor mv = cw.visitMethod(access, name, descriptor, signature, exceptions);
             mv.visitInsn(RETURN);
-           // mv.visitLdcInsn();
             Lazy.instance.getMethodCount().incrementAndGet();
         }
         return super.visitMethod(access, name, descriptor, signature, exceptions);
@@ -120,22 +119,6 @@ public class ClassExplorer extends ClassVisitor {
     }
 
     private void addField(int access, String name, String descriptor, String signature, Object value) {
-        System.out.println(value);
-        if (value != null) {
-            System.out.println("Value checks");
-            if (value instanceof String) {
-                System.out.println("Is String");
-                for (Pattern p : Config.EXEMPT_STRING_PATTERNS) {
-                    System.out.println("Pattern Test");
-                    Matcher m = p.matcher((String) value);
-                    System.out.println(" -- Matcher | Pattern=" + p.pattern() + ",Matches=" + m.matches() + ",Find=" + m.find());
-                    if (m.matches()) {
-                        return;
-                    }
-                }
-            }
-        }
-
         if (Config.VERBOSE) System.out.print(" -- Added field to class\n");
         cw.visitField(access, name, descriptor, signature, value).visitEnd();
         Lazy.instance.getFieldCount().incrementAndGet();
