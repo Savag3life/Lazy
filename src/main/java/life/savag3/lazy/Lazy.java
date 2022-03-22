@@ -2,7 +2,6 @@ package life.savag3.lazy;
 
 import com.google.gson.GsonBuilder;
 import life.savag3.lazy.asm.ClassExplorer;
-import life.savag3.lazy.gson.adaptors.PatternAdaptor;
 import life.savag3.lazy.utils.DiskUtils;
 import life.savag3.lazy.utils.PackageUtils;
 import life.savag3.lazy.utils.Persist;
@@ -15,73 +14,64 @@ import java.lang.reflect.Modifier;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
-import java.util.regex.Pattern;
 
 public class Lazy {
 
+    public static Lazy instance;
+
+    // Results Map to produce output jar <FullClassNameAndPackage, ClassContentAsByteArray>
     private final HashMap<String, byte[]> results = new HashMap<>();
+    // JarFile to read classes from
     private final JarFile jar;
+    // Output jar to create & populate, jar to read from.
     private final File output, original;
 
     @Getter private final Persist persist;
-    @Getter private final DiskUtils disk;
 
-    @Getter private final ExecutorService async = Executors.newFixedThreadPool(4);
-
+    // Stats & Tracking
     @Getter private final AtomicInteger fieldCount = new AtomicInteger(0);
     @Getter private final AtomicInteger methodCount = new AtomicInteger(0);
     @Getter private final AtomicInteger classCount = new AtomicInteger(0);
     @Getter private final Instant start;
-
-    public static Lazy instance;
 
     @SneakyThrows
     public Lazy(String[] args) {
         instance = this;
         start = Instant.now();
 
-        this.disk = new DiskUtils();
         this.persist = new Persist(
                 new GsonBuilder()
                         .setPrettyPrinting()
                         .disableHtmlEscaping()
-                        .registerTypeAdapter(Pattern.class, new PatternAdaptor())
                         .serializeNulls()
                         .excludeFieldsWithModifiers(Modifier.TRANSIENT, Modifier.VOLATILE)
-                        .create(),
-                this.disk
+                        .create()
         );
 
-        // Debug Paths
+        // Print working paths for debugging and testing
         System.out.println("Canonical Path - " + new java.io.File(".").getCanonicalPath());
         System.out.println("Working Dir - " + new File("").getAbsolutePath());
         System.out.println(" ");
 
+        // Parse args
         if (args.length < 2) {
             System.out.println("Invalid argument counts. Found " + args.length + ", Required 2");
-            System.out.println("Usage: java -jar <Path/To/Input.jar> <Path/To/Output.jar> [Path/To/Config.txt] ");
+            System.out.println("Usage: java -jar <Path/To/Input.jar> <Path/To/Output.jar> [Path/To/Config.json]");
             System.out.println("Map: `<>` fields are required, `[]` fields are optional");
             System.exit(1);
         }
 
         if (args.length == 3) {
+            // Read the config file from disk if it exists
             System.out.println("Reading Config... (" + args[2] + ")");
             Config.load(args[2]);
-        } else Config.load();
-
-        for (String package0 : Config.BLACKLISTED_PACKAGES) {
-            System.out.println("Skipping packages matching: " + package0);
-        }
-        System.out.println(" ");
-
-        for (Pattern pattern : Config.EXEMPT_STRING_PATTERNS) {
-            System.out.println("Skipping strings matching: " + pattern.pattern());
+        } else {
+            // Create a new config file if one doesn't exist
+            Config.load();
         }
 
         this.original = new File(args[0]);
@@ -94,16 +84,23 @@ public class Lazy {
             System.exit(1);
         }
 
+        // Enumerate over jarfile entries
         for (Enumeration<JarEntry> list = jar.entries(); list.hasMoreElements(); ) {
             JarEntry clazz = list.nextElement();
             if (clazz.isDirectory()) continue;
+            // We only care about class files.
             if (!clazz.getName().endsWith(".class")) continue;
 
             ClassReader reader = new ClassReader(jar.getInputStream(clazz));
 
             try {
-                if (PackageUtils.isBlacklistedPackage(clazz.getName())) {
-                    add(clazz.getName(), this.disk.getBytes(jar.getInputStream(clazz)));
+                // Check if a class is excluded | true ? skip : process
+                if (PackageUtils.isExcluded(clazz.getName())) continue;
+
+                // Check if a class is exempt | true ? write whole class to output : write stripped class to output
+                System.out.println("Processing " + clazz.getName());
+                if (PackageUtils.isExempt(clazz.getName())) {
+                    add(clazz.getName(), DiskUtils.read(jar.getInputStream(clazz)));
                 } else {
                     ClassExplorer explorer = new ClassExplorer();
                     reader.accept(explorer, 0);
@@ -116,6 +113,7 @@ public class Lazy {
             }
         }
 
+        // Pack & write the output jar
         pack();
     }
 

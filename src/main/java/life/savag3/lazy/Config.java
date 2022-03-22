@@ -9,8 +9,14 @@ public class Config {
 
     public static transient Config instance = new Config();
 
-    // Packages exempt from being stripped by Lazy
-    public static List<String> BLACKLISTED_PACKAGES = new ArrayList<>();
+    // Packages exempt from being stripped by Lazy (Essentially Skipping & adding to output jar)
+    // Format: package0/package1/package2/* - Exempt anything inside this package
+    // Format: package0/*/package2 - Exempt anything with the root path `package0` and a sub package `package2`
+    public static List<String> EXEMPT = new ArrayList<>();
+    // Packages to be excluded from the output (These packages / classes are not included in the output jar)
+    // Format: package0/package1/package2/* - Exclude anything inside this package
+    // Format: package0/*/package2 - Exclude anything with the root path `package0` and a sub package `package2`
+    public static List<String> EXCLUDE = new ArrayList<>();
 
     // Include Public Static Fields in the output
     public static boolean INCLUDE_PUB_STATIC_FIELDS = true;
@@ -22,21 +28,22 @@ public class Config {
     public static boolean INCLUDE_PRI_NON_STATIC_FIELDS = true;
     // Include Public Methods in the output
     public static boolean INCLUDE_PRIVATE_METHODS = false;
+    // Include Native Methods in the output
+    public static boolean INCLUDE_NATIVE_METHODS = false;
     // Include abstract classes in the output
     public static boolean INCLUDE_ABSTRACT_CLASSES = false;
     // Include enum data in the output
     public static boolean INCLUDE_ENUM_DATA = true;
 
-    // Do logging
+    // Do advanced logging
     public static boolean VERBOSE = true;
 
     static {
-        BLACKLISTED_PACKAGES.add("me/savag3/*/supreme/auth");
-        BLACKLISTED_PACKAGES.add("life/savag3/*/supreme/auth");
-        BLACKLISTED_PACKAGES.add("com/massivecraft/factions/supreme/auth/*");
-        BLACKLISTED_PACKAGES.add("com/google/*");
-        BLACKLISTED_PACKAGES.add("org/*");
-        BLACKLISTED_PACKAGES.add("javax/*");
+        EXCLUDE.add("package0/package1/package2/*");
+        EXCLUDE.add("package0/*/package2");
+
+        EXEMPT.add("package0/package1/package2/*");
+        EXEMPT.add("package0/*/package2");
     }
 
     public static void load(String path) {

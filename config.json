@@ -1,12 +1,19 @@
 {
-  "BLACKLISTED_PACKAGES": [],
+  "EXEMPT": [
+    "me/savag3/commons/BlockUtilities.class"
+  ],
+  "EXCLUDE": [
+    "me/savag3/commons/supreme/auth/*",
+    "me/savag3/commons/shade/com/sun/*",
+    "me/savag3/commons/shade/javaassist/*"
+  ],
   "INCLUDE_PUB_STATIC_FIELDS": true,
   "INCLUDE_PRI_STATIC_FIELDS": true,
   "INCLUDE_PUB_NON_STATIC_FIELDS": true,
   "INCLUDE_PRI_NON_STATIC_FIELDS": true,
   "INCLUDE_PRIVATE_METHODS": true,
+  "INCLUDE_NATIVE_METHODS": false,
   "INCLUDE_ABSTRACT_CLASSES": true,
   "INCLUDE_ENUM_DATA": true,
-  "EXEMPT_STRING_PATTERNS": [],
   "VERBOSE": true
 }

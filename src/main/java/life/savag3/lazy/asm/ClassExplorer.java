@@ -38,16 +38,14 @@ public class ClassExplorer extends ClassVisitor {
             return;
         }
 
-        this.cancelled = PackageUtils.isBlacklistedPackage(pack);
-        if (this.cancelled) return;
-
         cw.visit(i, i1, s, s1, s2, strings);
         Lazy.instance.getClassCount().incrementAndGet();
     }
 
     @Override
     public RecordComponentVisitor visitRecordComponent(String name, String descriptor, String signature) {
-        if (cancelled) return super.visitRecordComponent(name, descriptor, signature);
+        if (cancelled) // Class was skipped because it was abstract
+            return super.visitRecordComponent(name, descriptor, signature);
         if (Config.VERBOSE) System.out.println(" --E-- name=" + name + ",extends=" + descriptor + ",super=" + signature);
         return super.visitRecordComponent(name, descriptor, signature);
     }
@@ -55,17 +53,30 @@ public class ClassExplorer extends ClassVisitor {
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
-        if (cancelled) return super.visitMethod(access, name, descriptor, signature, exceptions);
+        if (cancelled) // Class was skipped because it was abstract
+            return super.visitMethod(access, name, descriptor, signature, exceptions);
         if (Config.VERBOSE) System.out.println(" --M-- name=" + name + ",extends=" + descriptor + ",super=" + signature + ",expt=" + (exceptions == null ? "" : exceptions.length > 0 ? String.join(", ", exceptions) : "") + " {}");
-        if (!name.startsWith("lambda")) {
-            if (access == ACC_PRIVATE || access == ACC_PRIVATE + ACC_STATIC) {
-                if (!Config.INCLUDE_PRIVATE_METHODS) {
+
+        switch (access) {
+            case ACC_PUBLIC + ACC_NATIVE:
+            case ACC_PUBLIC + ACC_STATIC + ACC_NATIVE:
+            case ACC_PUBLIC + ACC_STATIC + ACC_NATIVE + ACC_FINAL:
+            case ACC_PRIVATE + ACC_NATIVE:
+            case ACC_PRIVATE + ACC_STATIC + ACC_NATIVE:
+            case ACC_PRIVATE + ACC_STATIC + ACC_NATIVE + ACC_FINAL:
+                if (!Config.INCLUDE_NATIVE_METHODS)
                     return super.visitMethod(access, name, descriptor, signature, exceptions);
-                }
-            }
-            MethodVisitor mv = cw.visitMethod(access, name, descriptor, signature, exceptions);
-            mv.visitInsn(RETURN);
-            Lazy.instance.getMethodCount().incrementAndGet();
+                break;
+
+            case ACC_PRIVATE:
+            case ACC_PRIVATE + ACC_STATIC:
+                if (!Config.INCLUDE_PRIVATE_METHODS)
+                    return super.visitMethod(access, name, descriptor, signature, exceptions);
+                break;
+            default:
+                MethodVisitor mv = cw.visitMethod(access, name, descriptor, signature, exceptions);
+                mv.visitInsn(RETURN);
+                Lazy.instance.getMethodCount().incrementAndGet();
         }
         return super.visitMethod(access, name, descriptor, signature, exceptions);
     }
@@ -73,7 +84,8 @@ public class ClassExplorer extends ClassVisitor {
     @Override
     public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
         FieldVisitor visitor = super.visitField(access, name, descriptor, signature, value);
-        if (cancelled) return visitor;
+        if (cancelled) // Class was skipped because it was abstract
+            return visitor;
         if (Config.VERBOSE) System.out.print(" --F-- access=" + access + ",name=" + name + ",extends=" + descriptor + ",super=" + signature + ",value=" + (value == null ? "" : value.toString()) + ";");
 
         switch (access) {
@@ -127,8 +139,15 @@ public class ClassExplorer extends ClassVisitor {
     @Override
     @SneakyThrows
     public void visitEnd() {
-        if (this.cancelled) return;
+        if (this.cancelled) // Class was skipped because it was abstract
+            return;
         byte[] bytes = this.cw.toByteArray();
+
+        if (PackageUtils.isExempt(this.pack)) {
+            if (Config.VERBOSE) System.out.println(" -- Exempt package: " + this.pack);
+            return;
+        }
+
         Lazy.instance.add(pack + name + ".class", bytes);
     }
 }
