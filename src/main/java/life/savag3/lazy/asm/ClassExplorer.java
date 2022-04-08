@@ -7,8 +7,7 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.objectweb.asm.*;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Arrays;
 
 import static org.objectweb.asm.Opcodes.*;
 
@@ -30,7 +29,8 @@ public class ClassExplorer extends ClassVisitor {
     public void visit(int i, int i1, String s, String s1, String s2, String[] strings) {
         name = s.split("/")[s.split("/").length - 1];
         pack = s.substring(0, s.length() - name.length());
-        if (Config.VERBOSE) System.out.println(" -- name=" + s + ",extends=" + s1 + ",super=" + s2 + "{}");
+        if (Config.VERBOSE)
+            System.out.println(" -- name = " + s + ", extends = " + s1 + ", super = " + s2);
 
         if (i1 > ACC_ABSTRACT && !Config.INCLUDE_ABSTRACT_CLASSES) {
             System.out.println("Class " + name + " flagged as abstract, continuing...");
@@ -40,6 +40,73 @@ public class ClassExplorer extends ClassVisitor {
 
         cw.visit(i, i1, s, s1, s2, strings);
         Lazy.instance.getClassCount().incrementAndGet();
+    }
+
+    @Override
+    public void visitOuterClass(String owner, String name, String descriptor) {
+        if(cancelled)
+            return;
+
+        if (Config.VERBOSE)
+            System.out.println(" --OC-- owner = " + owner + ", name = " + name + ", descriptor = " + descriptor);
+
+        cw.visitOuterClass(owner, name, descriptor);
+    }
+
+    @Override
+    public void visitInnerClass(String name, String outerName, String innerName, int access) {
+        if(cancelled)
+            return;
+
+        if (Config.VERBOSE)
+            System.out.println(" --IC-- name = " + name + ", outerName = " + outerName + ", innerName = " + innerName + ", access = " + access);
+
+        cw.visitInnerClass(name, outerName, innerName, access);
+    }
+
+    @Override
+    public void visitPermittedSubclass(String permittedSubclass) {
+        if(cancelled)
+            return;
+
+        if (Config.VERBOSE)
+            System.out.println(" --PC-- permittedSubclass = " + permittedSubclass);
+
+        cw.visitPermittedSubclass(permittedSubclass);
+    }
+
+    @Override
+    public void visitNestMember(String nestMember) {
+        if(cancelled)
+            return;
+
+        if (Config.VERBOSE)
+            System.out.println(" --NM-- nestMember = " + nestMember);
+
+        cw.visitNestMember(nestMember);
+    }
+
+    @Override
+    public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
+        if(cancelled)
+            return super.visitAnnotation(descriptor, visible);
+
+        if (Config.VERBOSE)
+            System.out.println("descriptor = " + descriptor + ", visible = " + visible);
+
+        cw.visitAnnotation(descriptor, visible);
+        return super.visitAnnotation(descriptor, visible);
+    }
+
+    @Override
+    public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String descriptor, boolean visible) {
+        if(cancelled)
+            return super.visitTypeAnnotation(typeRef, typePath, descriptor, visible);
+
+        if (Config.VERBOSE)
+            System.out.println(" --TA-- typeRef = " + typeRef + ", typePath = " + typePath + ", descriptor = " + descriptor + ", visible = " + visible);
+        cw.visitTypeAnnotation(typeRef, typePath, descriptor, visible);
+        return super.visitTypeAnnotation(typeRef, typePath, descriptor, visible);
     }
 
     @Override
@@ -79,6 +146,14 @@ public class ClassExplorer extends ClassVisitor {
                 Lazy.instance.getMethodCount().incrementAndGet();
         }
         return super.visitMethod(access, name, descriptor, signature, exceptions);
+    }
+
+    @Override
+    public void visitAttribute(Attribute attribute) {
+        if(cancelled)
+            return;
+
+        cw.visitAttribute(attribute);
     }
 
     @Override
