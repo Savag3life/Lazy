@@ -1,4 +1,4 @@
-package life.savag3.lazy.asm;
+package life.savag3.lazy;
 
 import life.savag3.lazy.Config;
 import org.objectweb.asm.ClassReader;

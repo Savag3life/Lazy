@@ -1,4 +1,4 @@
-package life.savag3.lazy.utils;
+package life.savag3.lazy;
 
 import life.savag3.lazy.Config;
 import lombok.experimental.UtilityClass;

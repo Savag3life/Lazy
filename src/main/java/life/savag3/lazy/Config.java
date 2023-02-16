@@ -1,6 +1,8 @@
 package life.savag3.lazy;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -48,16 +50,30 @@ public class Config {
         EXEMPT.add("package0/*/package2");
     }
 
-    public static void load(String path) {
-        Lazy.instance.getPersist().loadOrSaveDefault(instance, Config.class, new File(path));
+    public static void load(Lazy lazy, String path) {
+        try {
+            String content = Files.readString(new File(path).toPath());
+            if (content == null || content.isEmpty()) return;
+            instance = lazy.getGson().fromJson(content, Config.class);
+        } catch (IOException er) {
+            System.out.println("Failed to load config file: " + path);
+            er.printStackTrace();
+            return;
+        }
     }
 
-    public static void load() {
-        Lazy.instance.getPersist().loadOrSaveDefault(instance, Config.class, "config");
+    public static void load(Lazy lazy) {
+        load(lazy, "config.json");
     }
 
-    public static void save() {
-        Lazy.instance.getPersist().save(instance);
+    public static void save(Lazy lazy) {
+        try {
+            Files.writeString(new File("config.json").toPath(), lazy.getGson().toJson(instance));
+        } catch (IOException er) {
+            System.out.println("Failed to save config file: config.json");
+            er.printStackTrace();
+            return;
+        }
     }
 
 }

@@ -1,9 +1,7 @@
 package life.savag3.lazy;
 
+import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import life.savag3.lazy.asm.LazyClassTransformer;
-import life.savag3.lazy.utils.PackageUtils;
-import life.savag3.lazy.utils.Persist;
 import lombok.Getter;
 import lombok.SneakyThrows;
 
@@ -12,40 +10,32 @@ import java.lang.reflect.Modifier;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 
 public class Lazy {
 
-    public static Lazy instance;
+    private JarFile jar;
+    private File output;
+    private final File original;
 
-    // Results Map to produce output jar <FullClassNameAndPackage, ClassContentAsByteArray>
     private final HashMap<String, byte[]> results = new HashMap<>();
-    // JarFile to read classes from
-    private final JarFile jar;
-    // Output jar to create & populate, jar to read from.
-    private final File output, original;
-    @Getter private final Persist persist;
+
+    @Getter private final Gson gson;
     @Getter private final Instant start;
 
-    @SneakyThrows
     public Lazy(String[] args) {
-        instance = this;
         start = Instant.now();
 
-        this.persist = new Persist(
-                new GsonBuilder()
+        this.gson = new GsonBuilder()
                         .setPrettyPrinting()
                         .disableHtmlEscaping()
                         .serializeNulls()
                         .excludeFieldsWithModifiers(Modifier.TRANSIENT, Modifier.VOLATILE)
-                        .create()
-        );
+                        .create();
 
         // Print working paths for debugging and testing
-        System.out.println("Canonical Path - " + new java.io.File(".").getCanonicalPath());
         System.out.println("Working Dir - " + new File("").getAbsolutePath());
         System.out.println(" ");
 
@@ -60,20 +50,33 @@ public class Lazy {
         if (args.length == 3) {
             // Read the config file from disk if it exists
             System.out.println("Reading Config... (" + args[2] + ")");
-            Config.load(args[2]);
+            Config.load(this, args[2]);
         } else {
             // Create a new config file if one doesn't exist
-            Config.load();
+            Config.load(this);
         }
 
         this.original = new File(args[0]);
+
         System.out.println("Reading Jar... (" + original.getAbsolutePath() + ")");
-        this.jar = new JarFile(original);
+        try {
+            this.jar = new JarFile(original);
+        } catch (IOException e) {
+            System.out.println("Failed to read jar file. (" + original.getAbsolutePath() + ")");
+            e.printStackTrace();
+            System.exit(1);
+            return;
+        }
+
         this.output = new File(args[1]);
 
-        if (!this.output.createNewFile()) {
+        try {
+            this.output.createNewFile();
+        } catch (IOException er) {
             System.out.println("Couldn't create output file... exiting");
+            er.printStackTrace();
             System.exit(1);
+            return;
         }
 
         // Enumerate over jarfile entries
