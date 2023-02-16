@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 public class Config {
 
@@ -65,15 +64,4 @@ public class Config {
     public static void load(Lazy lazy) {
         load(lazy, "config.json");
     }
-
-    public static void save(Lazy lazy) {
-        try {
-            Files.writeString(new File("config.json").toPath(), lazy.getGson().toJson(instance));
-        } catch (IOException er) {
-            System.out.println("Failed to save config file: config.json");
-            er.printStackTrace();
-            return;
-        }
-    }
-
 }
