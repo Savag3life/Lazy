@@ -31,9 +31,11 @@ public class Config {
     // Include Native Methods in the output
     public static boolean INCLUDE_NATIVE_METHODS = false;
     // Include abstract classes in the output
-    public static boolean INCLUDE_ABSTRACT_CLASSES = false;
+    @Deprecated public static boolean INCLUDE_ABSTRACT_CLASSES = true;
+    // Include method content for default interface classes
+    @Deprecated public static boolean INCLUDE_INTERFACE_METHODS = true;
     // Include enum data in the output
-    public static boolean INCLUDE_ENUM_DATA = true;
+    @Deprecated public static boolean INCLUDE_ENUM_DATA = true;
 
     // Do advanced logging
     public static boolean VERBOSE = true;

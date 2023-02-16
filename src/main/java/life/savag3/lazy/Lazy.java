@@ -1,13 +1,11 @@
 package life.savag3.lazy;
 
 import com.google.gson.GsonBuilder;
-import life.savag3.lazy.asm.ClassExplorer;
-import life.savag3.lazy.utils.DiskUtils;
+import life.savag3.lazy.asm.LazyClassTransformer;
 import life.savag3.lazy.utils.PackageUtils;
 import life.savag3.lazy.utils.Persist;
 import lombok.Getter;
 import lombok.SneakyThrows;
-import org.objectweb.asm.ClassReader;
 
 import java.io.*;
 import java.lang.reflect.Modifier;
@@ -29,13 +27,7 @@ public class Lazy {
     private final JarFile jar;
     // Output jar to create & populate, jar to read from.
     private final File output, original;
-
     @Getter private final Persist persist;
-
-    // Stats & Tracking
-    @Getter private final AtomicInteger fieldCount = new AtomicInteger(0);
-    @Getter private final AtomicInteger methodCount = new AtomicInteger(0);
-    @Getter private final AtomicInteger classCount = new AtomicInteger(0);
     @Getter private final Instant start;
 
     @SneakyThrows
@@ -90,21 +82,16 @@ public class Lazy {
             if (clazz.isDirectory()) continue;
             // We only care about class files.
             if (!clazz.getName().endsWith(".class")) continue;
-
-            ClassReader reader = new ClassReader(jar.getInputStream(clazz));
-
             try {
                 // Check if a class is excluded | true ? skip : process
                 if (PackageUtils.isExcluded(clazz.getName())) continue;
-
                 // Check if a class is exempt | true ? write whole class to output : write stripped class to output
                 System.out.println("Processing " + clazz.getName());
                 if (PackageUtils.isExempt(clazz.getName())) {
-                    add(clazz.getName(), DiskUtils.read(jar.getInputStream(clazz)));
+                    add(clazz.getName(), jar.getInputStream(clazz).readAllBytes());
                 } else {
-                    ClassExplorer explorer = new ClassExplorer();
-                    reader.accept(explorer, 0);
-                    explorer.visitEnd();
+                    LazyClassTransformer transformer = new LazyClassTransformer(jar.getInputStream(clazz).readAllBytes());
+                    add(clazz.getName(), transformer.transform());
                 }
             } catch (Exception e) {
                 System.out.println("Failed to read class: " + clazz.getName() + " - Class is compiled on a unsupported version of Java");
@@ -150,7 +137,6 @@ public class Lazy {
 
         System.out.println(" ");
         System.out.println("Jar saved to " + this.output.getAbsolutePath() + " in " + Duration.between(start, Instant.now()).toMillis() + "ms");
-        System.out.println("Cleaned " + classCount.get() + " classes containing " + methodCount.get() + " methods & " + fieldCount + " static fields.");
         System.out.println("Original Size: " + this.original.length() + " bytes, New size: " + this.output.length() + " bytes; Size reduced by " + (Math.abs((1.0f - ((float) this.output.length() / (float) this.original.length()))) * 100.0f) + "%");
     }
 }

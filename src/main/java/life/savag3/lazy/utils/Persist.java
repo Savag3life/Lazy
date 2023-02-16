@@ -6,6 +6,7 @@ import lombok.NonNull;
 import java.io.File;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 public final class Persist {
 
@@ -77,7 +78,11 @@ public final class Persist {
     public void save(@NonNull Object instance, @NonNull String name) { save(instance, getFile(name)); }
 
     public void save(@NonNull Object instance, @NonNull File file) {
-        DiskUtils.write(file, this.gson.toJson(instance).getBytes(StandardCharsets.UTF_8));
+        try {
+            Files.writeString(file.toPath(), this.gson.toJson(instance));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public <T> T load(@NonNull Class<T> clazz) {
@@ -89,7 +94,13 @@ public final class Persist {
     }
 
     public <T> T load(@NonNull Class<T> clazz, @NonNull File file) {
-        final byte[] content = DiskUtils.read(file);
+        byte[] content = null;
+        try {
+            content = Files.readAllBytes(file.toPath());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
         if (content == null) return null;
         try { return this.gson.fromJson(new String(content), clazz); }
         catch (Exception ex) {
@@ -105,7 +116,13 @@ public final class Persist {
 
     @SuppressWarnings("unchecked")
     public <T> T load(@NonNull Type typeOfT, @NonNull File file) {
-        final byte[] content = DiskUtils.read(file);
+        byte[] content = null;
+        try {
+            content = Files.readAllBytes(file.toPath());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
         if (content == null) return null;
         try {
             return (T) this.gson.fromJson(new String(content), typeOfT);
