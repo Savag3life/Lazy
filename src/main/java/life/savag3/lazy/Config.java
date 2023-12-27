@@ -51,6 +51,8 @@ public class Config {
             "me.savag3.gucci.common.annotations.RetainAPI"
     );
 
+    public static boolean DO_JETBRAINS_CONTRACTS = true;
+
     // Should Lazy print verbose output to the console
     public static boolean VERBOSE = true;
 
