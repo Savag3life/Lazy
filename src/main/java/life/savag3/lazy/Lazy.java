@@ -27,7 +27,7 @@ import java.util.jar.JarOutputStream;
  */
 public class Lazy {
 
-    private File output; // Output jar
+    private final File output; // Output jar
 
     private File originalFile; // Original input jar
     private JarFile originalJarFile; // The opened input jar
@@ -154,7 +154,7 @@ public class Lazy {
      */
     public void pack() {
         System.out.println(" ");
-        System.out.println(" Writing new Jar (" + this.output.getAbsolutePath() + ")");
+        System.out.println("Writing new Jar (" + this.output.getAbsolutePath() + ")");
 
         JarOutputStream jarOutputStream;
         try {

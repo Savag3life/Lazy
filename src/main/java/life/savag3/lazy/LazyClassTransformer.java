@@ -159,7 +159,7 @@ public class LazyClassTransformer {
     private void resolveReturnType(MethodNode node, InsnList list) {
         Type type = Type.getType(node.desc);
         switch (type.getReturnType().getDescriptor()) {
-            case "I" -> {
+            case "I", "Z" -> {
                 list.add(new InsnNode(Opcodes.ICONST_0));
                 list.add(new InsnNode(Opcodes.IRETURN));
             }
@@ -187,9 +187,10 @@ public class LazyClassTransformer {
 
     /**
      * Append a @Contract(_,_->!null) contact to any methods which may now
-     * return a null value due to default return values.
+     * return a null value due to default return values from class stripping. (any non-void, non-primitive value)
      * Helps provide better intellisense to intellij IDE's & intellij errors for "results may be null"
      * @param method MethodNode to append the contract to
+     * @see MethodNode
      */
     private void handleJetbrainsAnnotation(MethodNode method) {
         AnnotationNode contract = new AnnotationNode("Lorg/jetbrains/annotations/Contract;");
@@ -214,10 +215,16 @@ public class LazyClassTransformer {
      * Resolve the number of parameters for a given method descriptor
      * @param raw Method descriptor
      * @return int number of parameters
+     * @see MethodNode#desc
      */
     private int resolveParamCount(String raw) {
         int count = 0;
         if (raw.startsWith("()")) return 0;
+
+        // Example Method:     void example(String x, String z)
+        // Example Descriptor: (Ljava/lang/String;Ljava/lang/String;)V
+        // We only want the content in params, plus the tailing `)` to
+        // handle cases which don't end in ';'
         String desc = raw.substring(raw.indexOf("(") + 1, raw.indexOf(")") + 1);
         if (desc.isBlank()) return 0;
         for (int x = 0; x < desc.length() - 1; x++) {
@@ -260,13 +267,20 @@ public class LazyClassTransformer {
             return false;
         }
 
-        // Only need to add contracts to methods which don't return (void | int | long | float | double)
+        // Don't need contract annotations for methods which aren't stripped.
+        if (node.visibleAnnotations.stream()
+                .anyMatch(annotation -> Config.RETENTION_ANNOTATIONS.contains(annotation.desc))) {
+            return false;
+        }
+
+        // Only need to add contracts to methods which don't return (void | int | long | float | double | boolean)
         Type type = Type.getType(node.desc);
         String descriptor = type.getReturnType().getDescriptor();
         return !descriptor.equals("I") &&
                 !descriptor.equals("J") &&
                 !descriptor.equals("F") &&
                 !descriptor.equals("D") &&
+                !descriptor.equals("Z") &&
                 !descriptor.equals("V");
     }
 }
