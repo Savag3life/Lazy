@@ -27,6 +27,8 @@ import java.util.jar.JarOutputStream;
  */
 public class Lazy {
 
+    @Getter private static final String VERSION = "2.1.0-SNAPSHOT";
+
     private final File output; // Output jar
 
     private File originalFile; // Original input jar
@@ -38,6 +40,7 @@ public class Lazy {
     @Getter private final Instant start;
 
     public Lazy(String input, String output, String config) {
+        System.out.println("Lazy Class Stripper v" + VERSION + " - https://github.com/Savag3life/Lazy");
         start = Instant.now();
 
         this.gson = new GsonBuilder()
