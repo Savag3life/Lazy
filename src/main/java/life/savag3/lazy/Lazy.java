@@ -27,7 +27,7 @@ import java.util.jar.JarOutputStream;
  */
 public class Lazy {
 
-    @Getter private static final String VERSION = "2.1.0-SNAPSHOT";
+    @Getter private static final String VERSION = "3.1.0-SNAPSHOT";
 
     private final File output; // Output jar
 
