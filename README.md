@@ -21,6 +21,7 @@ Lazy has a decent amount of logging included by default, we recommend using ` > 
 | `VERBOSE`                        | Should Lazy do extra debugging logging when processing?                                               | `true` or `false`           |
 | `RETENTION_ANNOTATIONS`          | Fields & methods annotated with these annotations are excluded.                                       | `pack0/pack1/APIAnnotation` |
 | `DO_JETBRAINS_CONTRACTS`         | Should Lazy add JetBrains contracts?                                                                  | `true` or `false`           |
+
 *Retention annotations override all other configuration options.*
 *Default config is generated when Lazy is run without a config file specified in the command line.*
 *Config name is `config.json`*
