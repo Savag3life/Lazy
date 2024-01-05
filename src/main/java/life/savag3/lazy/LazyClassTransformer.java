@@ -267,10 +267,12 @@ public class LazyClassTransformer {
             return false;
         }
 
-        // Don't need contract annotations for methods which aren't stripped.
-        if (node.visibleAnnotations.stream()
-                .anyMatch(annotation -> Config.RETENTION_ANNOTATIONS.contains(annotation.desc))) {
-            return false;
+        if (node.visibleAnnotations != null && !node.visibleAnnotations.isEmpty()) {
+            // Don't need contract annotations for methods which aren't stripped.
+            if (node.visibleAnnotations.stream()
+                    .anyMatch(annotation -> Config.RETENTION_ANNOTATIONS.contains(annotation.desc))) {
+                return false;
+            }
         }
 
         // Only need to add contracts to methods which don't return (void | int | long | float | double | boolean)
