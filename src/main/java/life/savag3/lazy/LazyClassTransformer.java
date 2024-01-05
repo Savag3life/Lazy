@@ -250,13 +250,15 @@ public class LazyClassTransformer {
 
             if (index == ')') break;
 
-            while (index != ';' && index != ')') {
-                x++;
-                index = desc.charAt(x);
+            int z = x;
+            while (index != ';' && index != ')' && index != 'L') {
+                z++;
+                index = desc.charAt(z);
                 count++;
             }
-        }
 
+            x = z - 1;
+        }
         return count;
     }
 
