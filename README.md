@@ -7,6 +7,28 @@ Components listed inside `<>` are considered required, components listed inside 
 
 Lazy has a decent amount of logging included by default, we recommend using ` > log.txt` on the end of the above command to dump the log of Lazy to a `log.txt` file in your working directory.
 
+### Example
+Given the following code block as an example:
+```java
+    public List<CustomObject> deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+        try {
+            final JsonObject obj = jsonElement.getAsJsonObject();
+            final List<CustomObject> list = new ArrayList<>();
+            // Internal code we don't want to share publicly
+            return list;
+        } catch (Exception ignored) {
+            
+        }
+    }
+```
+Becomes:
+```java
+    @Contract(value="_,_,_->!null")
+    public List<CustomObject> deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+        return null;
+    }
+```
+
 ### [Configuration Options](https://bin.supremeventures.ca/hepejikaci.json)
 | Config Name                      | Description                                                                                           | Format                      |
 |----------------------------------|-------------------------------------------------------------------------------------------------------|-----------------------------|
